@@ -26,11 +26,10 @@ EGAAbilitieNode FGASAbilitieNodeBase::GetNodeType() const
 }
 
 FGASAbilitieNodeBase::FGASAbilitieNodeBase()
-	:Tint(FLinearColor(1.f,1.f,1.f,0.5f))
-	,bIsShow(true)
-	,GAAbilitieNode(EGAAbilitieNode::Node_Abilitie)
+	: Tint(FLinearColor(1.f, 1.f, 1.f, 0.5f))
+	  , bIsShow(true)
+	  , GAAbilitieNode(EGAAbilitieNode::Node_Abilitie)
 {
-
 }
 
 const FLinearColor& FGASAbilitieNodeBase::GetTint() const
@@ -97,10 +96,11 @@ void SGASAbilitieTreeItem::Construct(const FArguments& InArgs, const TSharedRef<
 		SetVisibility(EVisibility::Collapsed);
 	}
 
-	SMultiColumnTableRow< TSharedRef<FGASAbilitieNodeBase> >::Construct(SMultiColumnTableRow< TSharedRef<FGASAbilitieNodeBase> >::FArguments().Padding(0), InOwnerTableView);
+	SMultiColumnTableRow<TSharedRef<FGASAbilitieNodeBase>>::Construct(SMultiColumnTableRow<TSharedRef<FGASAbilitieNodeBase>>::FArguments().Padding(0), InOwnerTableView);
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
 TSharedRef<SWidget> SGASAbilitieTreeItem::GenerateWidgetForColumn(const FName& ColumnName)
 {
 	if (NAME_AbilitietName == ColumnName)
@@ -123,18 +123,18 @@ TSharedRef<SWidget> SGASAbilitieTreeItem::GenerateWidgetForColumn(const FName& C
 				.VAlign(VAlign_Center)
 				[
 					SNew(SBorder)
-					.HAlign(HAlign_Left)
-					.VAlign(VAlign_Center)
+					             .HAlign(HAlign_Left)
+					             .VAlign(VAlign_Center)
 					//.Padding(FMargin(2.0f, 0.0f))
-					.Visibility(EVisibility::SelfHitTestInvisible)
-					.BorderBackgroundColor(FSlateColor(FLinearColor(1.f,1.f,1.f,0.f)))
-					.ColorAndOpacity(this, &SGASAbilitieTreeItem::GetTint)
+					             .Visibility(EVisibility::SelfHitTestInvisible)
+					             .BorderBackgroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 0.f)))
+					             .ColorAndOpacity(this, &SGASAbilitieTreeItem::GetTint)
 					[
 						SNew(SHyperlink)
 						.Text(this, &SGASAbilitieTreeItem::GetReadableLocationAsText)
 						.OnNavigate(this, &SGASAbilitieTreeItem::HandleHyperlinkNavigate)
 					]
-				] ;
+				];
 		}
 		else
 		{
@@ -206,6 +206,7 @@ TSharedRef<SWidget> SGASAbilitieTreeItem::GenerateWidgetForColumn(const FName& C
 
 	return SNullWidget::NullWidget;
 }
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 FText SGASAbilitieTreeItem::GetReadableLocationAsText() const
@@ -246,9 +247,10 @@ TSharedRef<FGASAbilitieNode> FGASAbilitieNode::Create(TWeakObjectPtr<UAbilitySys
 	return MakeShareable(new FGASAbilitieNode(InASComponent, InAbilitySpecPtr));
 }
 
-TSharedRef<FGASAbilitieNode> FGASAbilitieNode::Create(TWeakObjectPtr<UAbilitySystemComponent> InASComponent, FGameplayAbilitySpec InAbilitySpecPtr, TWeakObjectPtr<UGameplayTask> InGameplayTask)
+TSharedRef<FGASAbilitieNode> FGASAbilitieNode::Create(TWeakObjectPtr<UAbilitySystemComponent> InASComponent, FGameplayAbilitySpec InAbilitySpecPtr,
+                                                      TWeakObjectPtr<UGameplayTask> InGameplayTask)
 {
-	return MakeShareable(new FGASAbilitieNode(InASComponent,InAbilitySpecPtr, InGameplayTask));
+	return MakeShareable(new FGASAbilitieNode(InASComponent, InAbilitySpecPtr, InGameplayTask));
 }
 
 FName FGASAbilitieNode::GetGAName() const
@@ -309,15 +311,16 @@ FText FGASAbilitieNode::GetGAStateType()
 		Tint = FLinearColor::Red;
 		ScreenGAMode = Blocked;
 	}
-	else if (AbilitySpecPtr.Ability->CanActivateAbility(AbilitySpecPtr.Handle, ASComponent->AbilityActorInfo.Get(), nullptr, nullptr, &FailureTags) == false)
+	else if (ASComponent->AbilityActorInfo.IsValid() && AbilitySpecPtr.Ability->CanActivateAbility(AbilitySpecPtr.Handle, ASComponent->AbilityActorInfo.Get(), nullptr, nullptr,
+	                                                                                               &FailureTags) == false)
 	{
 		//CN: OutType = LOCTEXT("CantActivate","被阻止激活");
-		OutType = LOCTEXT("CantActivate","Blocked");
-		float Cooldown =  AbilitySpecPtr.Ability->GetCooldownTimeRemaining(ASComponent->AbilityActorInfo.Get());
+		OutType = LOCTEXT("CantActivate", "Blocked");
+		float Cooldown = AbilitySpecPtr.Ability->GetCooldownTimeRemaining(ASComponent->AbilityActorInfo.Get());
 		if (Cooldown > 0.f)
 		{
 			//CN: OutType = FText::Format(FText::FromString(TEXT("{0},{1}:{2}s")),OutType ,LOCTEXT("Cooldown", "CD时间未完"),Cooldown);
-			OutType = FText::Format(FText::FromString(TEXT("{0},{1}:{2}s")),OutType ,LOCTEXT("Cooldown", "Cooldown Time"), Cooldown);
+			OutType = FText::Format(FText::FromString(TEXT("{0},{1}:{2}s")), OutType,LOCTEXT("Cooldown", "Cooldown Time"), Cooldown);
 		}
 		Tint = FLinearColor::Red;
 		ScreenGAMode = Blocked;
@@ -349,7 +352,7 @@ FString FGASAbilitieNode::GetAbilityTriggersName() const
 	for (int32 i = 0; i < ActivationTags->Num(); i++)
 	{
 		const FAbilityTriggerData* Item = &ActivationTags->GetData()[i];
-		Str += FString::Printf(TEXT("Tag: (%s),Event:(%s)"),*Item->TriggerTag.ToString(),*UEnum::GetDisplayValueAsText(Item->TriggerSource).ToString());
+		Str += FString::Printf(TEXT("Tag: (%s),Event:(%s)"), *Item->TriggerTag.ToString(), *UEnum::GetDisplayValueAsText(Item->TriggerSource).ToString());
 
 		if (i < ActivationTags->Num() - 1)
 		{
@@ -399,7 +402,6 @@ FString FGASAbilitieNode::GetWidgetAssetData() const
 
 	if (UGameplayAbility* Ability = AbilitySpecPtr.Ability)
 	{
-
 		if (Ability->IsAsset())
 		{
 			Ability->GetPathName();
@@ -417,8 +419,8 @@ FString FGASAbilitieNode::GetWidgetAssetData() const
 }
 
 
-FGASAbilitieNode::FGASAbilitieNode(TWeakObjectPtr<UAbilitySystemComponent> InASComponent,  FGameplayAbilitySpec InAbilitySpecPtr)
-	:FGASAbilitieNodeBase()
+FGASAbilitieNode::FGASAbilitieNode(TWeakObjectPtr<UAbilitySystemComponent> InASComponent, FGameplayAbilitySpec InAbilitySpecPtr)
+	: FGASAbilitieNodeBase()
 {
 	AbilitySpecPtr = InAbilitySpecPtr;
 	ASComponent = InASComponent;
@@ -430,7 +432,7 @@ FGASAbilitieNode::FGASAbilitieNode(TWeakObjectPtr<UAbilitySystemComponent> InASC
 	CreateChild();
 }
 
-FGASAbilitieNode::FGASAbilitieNode(TWeakObjectPtr<UAbilitySystemComponent> InASComponent,  FGameplayAbilitySpec InAbilitySpecPtr, TWeakObjectPtr<UGameplayTask> InGameplayTask)
+FGASAbilitieNode::FGASAbilitieNode(TWeakObjectPtr<UAbilitySystemComponent> InASComponent, FGameplayAbilitySpec InAbilitySpecPtr, TWeakObjectPtr<UGameplayTask> InGameplayTask)
 {
 	ASComponent = InASComponent;
 	AbilitySpecPtr = InAbilitySpecPtr;
@@ -453,7 +455,7 @@ void FGASAbilitieNode::CreateChild()
 
 		// 因为Instance->ActiveTasks在protected里面，也没有其Get方法，好在他是UPROPERTY带UE4反射的结构体
 		// Because instance - > activetasks is in protected, there is no get method. Fortunately, it is a structure with upproperty and UE4 reflection
-		FArrayProperty* ActiveTasksPtr = FindFProperty<FArrayProperty>(Instance->GetClass(),"ActiveTasks");
+		FArrayProperty* ActiveTasksPtr = FindFProperty<FArrayProperty>(Instance->GetClass(), "ActiveTasks");
 
 		if (!ActiveTasksPtr) continue;
 
@@ -461,10 +463,9 @@ void FGASAbilitieNode::CreateChild()
 
 		for (UGameplayTask*& Item : ActiveTasks)
 		{
-			if(!Item) continue;
-			AddChildNode(FGASAbilitieNode::Create(ASComponent, AbilitySpecPtr , Item));
+			if (!Item) continue;
+			AddChildNode(FGASAbilitieNode::Create(ASComponent, AbilitySpecPtr, Item));
 		}
-
 	}
 }
 
