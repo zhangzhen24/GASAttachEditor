@@ -23,6 +23,8 @@
 #if WITH_EDITOR
 #include "EditorStyleSet.h"
 #endif
+#include "BlueprintEditor.h"
+#include "BlueprintEditorModule.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 
 static const FName GASAttachEditorTabName("GASAttachEditor");
@@ -38,19 +40,26 @@ void FGASAttachEditorModule::StartupModule()
 	FGASAttachEditorCommands::Register();
 
 	PluginCommands = MakeShareable(new FUICommandList);
+	PluginCommands->MapAction(
+		FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer_Button,
+		FExecuteAction::CreateRaw(this, &FGASAttachEditorModule::PluginButtonClicked),
+		FCanExecuteAction());
+
+	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FGASAttachEditorModule::RegisterMenus));
+
 #if WITH_EDITOR
-	const IWorkspaceMenuStructure& MenuStructure =  WorkspaceMenu::GetMenuStructure();
+	const IWorkspaceMenuStructure& MenuStructure = WorkspaceMenu::GetMenuStructure();
 #endif
+	//注册到Debug
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(GASAttachEditorTabName, FOnSpawnTab::CreateRaw(this, &FGASAttachEditorModule::OnSpawnPluginTab))
-		/*.SetDisplayName(LOCTEXT("FGASAttachEditorTabTitle", "查看角色携带GA"))
-		.SetTooltipText(LOCTEXT("FGASAttachEditorTooltipText", "打开“查看角色携带GA”选项卡"))*/
-		.SetDisplayName(LOCTEXT("FGASAttachEditorTabTitle", "Debug Gameplay Ability System"))
-		.SetTooltipText(LOCTEXT("FGASAttachEditorTooltipText", "Open the Debug Gameplay Ability System tab"))
+	                        /*.SetDisplayName(LOCTEXT("FGASAttachEditorTabTitle", "查看角色携带GA"))
+	                        .SetTooltipText(LOCTEXT("FGASAttachEditorTooltipText", "打开“查看角色携带GA”选项卡"))*/
+	                        .SetDisplayName(LOCTEXT("FGASAttachEditorTabTitle", "Debug Gameplay Ability System"))
+	                        .SetTooltipText(LOCTEXT("FGASAttachEditorTooltipText", "Open the Debug Gameplay Ability System tab"))
 #if WITH_EDITOR
 		.SetGroup(MenuStructure.GetDeveloperToolsDebugCategory())
 #endif
-		.SetIcon(FSlateIcon(FGASAttachEditorStyle::GetStyleSetName(), "GASAttachEditor.OpenPluginWindow"));
-
+		.SetIcon(FSlateIcon(FGASAttachEditorStyle::GetStyleSetName(), "GASAttachEditor.ShowGASAttachEditorViewer"));
 }
 
 void FGASAttachEditorModule::ShutdownModule()
@@ -79,6 +88,22 @@ void FGASAttachEditorModule::ShutdownModule()
 }
 
 TSharedRef<SDockTab> FGASAttachEditorModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+	return CreateGASEditorTabView();
+}
+
+TSharedPtr<SWidget> FGASAttachEditorModule::CreateGASCheckTool()
+{
+	TSharedPtr<SWidget> ReturnWidget;
+	if (IsInGameThread())
+	{
+		TSharedPtr<SGASAttachEditor> SharedPtr = SNew(SGASAttachEditor);
+		ReturnWidget = SharedPtr;
+	}
+	return ReturnWidget;
+}
+
+TSharedRef<class SDockTab> FGASAttachEditorModule::CreateGASEditorTabView()
 {
 	const TSharedRef<SDockTab> NomadTab = SAssignNew(GameplayCheckEditorTab, SDockTab)
 		.TabRole(ETabRole::NomadTab);
@@ -122,11 +147,10 @@ TSharedRef<SDockTab> FGASAttachEditorModule::OnSpawnPluginTab(const FSpawnTabArg
 			}
 		}
 		, GASEditorTabManagerWeak
-		));
+	));
 
 	if (!GASEditorTabLayout.IsValid())
 	{
-
 		SGASAttachEditor::RegisterTabSpawner(*GASEditorTabManager);
 
 #if WITH_EDITOR
@@ -203,6 +227,7 @@ TSharedRef<SDockTab> FGASAttachEditorModule::OnSpawnPluginTab(const FSpawnTabArg
 		)
 	);
 
+
 #if WITH_EDITOR
 	PluginCommands->MapAction(
 		FGASAttachEditorCommands::Get().ShowGASTagLookAssetViewer,
@@ -226,42 +251,43 @@ TSharedRef<SDockTab> FGASAttachEditorModule::OnSpawnPluginTab(const FSpawnTabArg
 	TabContents->SetOnMouseButtonUp(
 		FPointerEventHandler::CreateStatic(
 			[]( /** The geometry of the widget*/
-				const FGeometry&,
-				/** The Mouse Event that we are processing */
-				const FPointerEvent& PointerEvent,
-				TWeakPtr<SWidget> InOwnerWeak,
-				TSharedPtr<FUICommandList> InCommandList) -> FReply
-	{
-		if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton)
-		{
-			// if the tab manager is still available then make a context window that allows users to
-			// show and hide tabs:
-			TSharedPtr<SWidget> InOwner = InOwnerWeak.Pin();
-			if (InOwner.IsValid())
+			const FGeometry&,
+			/** The Mouse Event that we are processing */
+			const FPointerEvent& PointerEvent,
+			TWeakPtr<SWidget> InOwnerWeak,
+			TSharedPtr<FUICommandList> InCommandList) -> FReply
 			{
-				FMenuBuilder MenuBuilder(true, InCommandList);
-
-				MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
+				if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton)
 				{
-					MenuBuilder.AddMenuEntry(FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer);
+					// if the tab manager is still available then make a context window that allows users to
+					// show and hide tabs:
+					TSharedPtr<SWidget> InOwner = InOwnerWeak.Pin();
+					if (InOwner.IsValid())
+					{
+						FMenuBuilder MenuBuilder(true, InCommandList);
+
+						MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
+						{
+							MenuBuilder.AddMenuEntry(FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer);
 #if WITH_EDITOR
-					MenuBuilder.AddMenuEntry(FGASAttachEditorCommands::Get().ShowGASTagLookAssetViewer);
+							MenuBuilder.AddMenuEntry(FGASAttachEditorCommands::Get().ShowGASTagLookAssetViewer);
 #endif
+						}
+						MenuBuilder.PopCommandList();
+
+
+						FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
+						FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(),
+						                                  FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+
+						return FReply::Handled();
+					}
 				}
-				MenuBuilder.PopCommandList();
 
-
-				FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
-				FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-
-				return FReply::Handled();
+				return FReply::Unhandled();
 			}
-		}
-
-		return FReply::Unhandled();
-	}
 			, OwningWidgetWeak
-		, PluginCommands
+			, PluginCommands
 		)
 	);
 
@@ -277,17 +303,6 @@ TSharedRef<SDockTab> FGASAttachEditorModule::OnSpawnPluginTab(const FSpawnTabArg
 	);
 
 	return NomadTab;
-}
-
-TSharedPtr<SWidget> FGASAttachEditorModule::CreateGASCheckTool()
-{
-	TSharedPtr<SWidget> ReturnWidget;
-	if (IsInGameThread())
-	{
-		TSharedPtr<SGASAttachEditor> SharedPtr = SNew(SGASAttachEditor);
-		ReturnWidget = SharedPtr;
-	}
-	return ReturnWidget;
 }
 
 static void GASAttachEditorShow(UWorld* InWorld)
@@ -309,19 +324,26 @@ void FGASAttachEditorModule::PluginButtonClicked()
 
 void FGASAttachEditorModule::RegisterMenus()
 {
-#if WITH_EDITOR
 	// Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
 	FToolMenuOwnerScoped OwnerScoped(this);
 	{
 		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-		{
-			FToolMenuSection& Section = Menu->FindOrAddSection("WindowGlobalTabSpawners");
-			Section.AddMenuEntryWithCommandList(FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer, PluginCommands);
-		}
+		FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
+		Section.AddMenuEntryWithCommandList(FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer_Button, PluginCommands);
 	}
-#endif
+
+	{
+		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.PlayToolBar");
+		FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("PluginTools|GameplayTagUtility");
+		FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FGASAttachEditorCommands::Get().ShowGASAttachEditorViewer_Button));
+		Entry.SetCommandList(PluginCommands);
+		Entry.Name = "ShowGASAttachEditorViewer";
+		Entry.Label = FText::FromString("Show GAS Attach Editor Viewer");
+		Entry.ToolTip = FText::FromString(TEXT("Open GAS Attach Editor"));
+	}
 }
 
+
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FGASAttachEditorModule, GASAttachEditor)

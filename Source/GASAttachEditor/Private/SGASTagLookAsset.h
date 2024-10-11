@@ -5,14 +5,18 @@
 
 class FTabManager;
 
+
+/**
+ * Tag
+ */
 class SGASTagLookAsset : public SUserWidget
 {
 public:
+	SLATE_USER_ARGS(SGASTagLookAsset)
+		{
+		}
 
-	SLATE_USER_ARGS(SGASTagLookAsset) {}
 	SLATE_END_ARGS()
-
-
 
 public:
 	virtual void Construct(const FArguments& InArgs) = 0;

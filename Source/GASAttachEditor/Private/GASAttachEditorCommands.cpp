@@ -7,6 +7,7 @@
 void FGASAttachEditorCommands::RegisterCommands()
 {
 	UI_COMMAND(ShowGASAttachEditorViewer, /*"查看角色携带GA"*/"GAS Debug", "Open the Debug Gameplay Ability System tab", EUserInterfaceActionType::Check, FInputChord());
+	UI_COMMAND(ShowGASAttachEditorViewer_Button, /*"查看角色携带GA"*/"GAS Debug", "Open the Debug Gameplay Ability System tab", EUserInterfaceActionType::Button, FInputChord());
 #if WITH_EDITOR
 	UI_COMMAND(ShowGASTagLookAssetViewer, /*"查看可Tag调用的GA"*/"View CallByTag Abilities", "Open the GASTagLookAsset tab", EUserInterfaceActionType::Check, FInputChord());
 #endif

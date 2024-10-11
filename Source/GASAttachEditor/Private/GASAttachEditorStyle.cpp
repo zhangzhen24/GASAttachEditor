@@ -6,7 +6,7 @@
 #include "Slate/SlateGameResources.h"
 #include "Interfaces/IPluginManager.h"
 
-TSharedPtr< FSlateStyleSet > FGASAttachEditorStyle::StyleInstance = NULL;
+TSharedPtr<FSlateStyleSet> FGASAttachEditorStyle::StyleInstance = NULL;
 
 void FGASAttachEditorStyle::Initialize()
 {
@@ -40,12 +40,14 @@ const FVector2D Icon16x16(16.0f, 16.0f);
 const FVector2D Icon20x20(20.0f, 20.0f);
 const FVector2D Icon40x40(40.0f, 40.0f);
 
-TSharedRef< FSlateStyleSet > FGASAttachEditorStyle::Create()
+TSharedRef<FSlateStyleSet> FGASAttachEditorStyle::Create()
 {
-	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("GASAttachEditorStyle"));
+	TSharedRef<FSlateStyleSet> Style = MakeShareable(new FSlateStyleSet("GASAttachEditorStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("GASAttachEditor")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("GASAttachEditor.OpenPluginWindow", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon16x16));
+	Style->Set("GASAttachEditor.ShowGASAttachEditorViewer", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon16x16));
+	Style->Set("GASAttachEditor.ShowGASAttachEditorViewer_Button", new IMAGE_BRUSH(TEXT("Icon128"), Icon20x20));
+	Style->Set("GASAttachEditor.ShowGASTagLookAssetViewer", new IMAGE_BRUSH(TEXT("ButtonIcon_40x"), Icon16x16));
 
 
 	return Style;

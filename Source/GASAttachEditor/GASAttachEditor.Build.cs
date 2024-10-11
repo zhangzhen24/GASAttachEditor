@@ -66,6 +66,9 @@ public class GASAttachEditor : ModuleRules
 				"GameplayTagsEditor",
 				"WorkspaceMenuStructure",
 				"ToolMenus",
+				"Kismet",
+				"AnimationBlueprintEditor",
+				"EditorFramework",
 			}
             );
         }

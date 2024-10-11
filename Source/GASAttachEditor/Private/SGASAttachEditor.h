@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,26 +11,26 @@ enum EDebugAbilitieCategories
 {
 	// 标签
 	Tags,
-
 	// 数据
 	Attributes,
-
 	// 效果
 	GameplayEffects,
-
 	// 技能
 	Ability,
 };
 
 
+/**
+ * GAS Attach Editor 编辑器界面
+ */
 class SGASAttachEditor : public SUserWidget
 {
 public:
+	SLATE_USER_ARGS(SGASAttachEditor)
+		{
+		}
 
-	SLATE_USER_ARGS(SGASAttachEditor) {}
 	SLATE_END_ARGS()
-
-		
 
 public:
 	virtual void Construct(const FArguments& InArgs) = 0;
@@ -45,7 +44,6 @@ public:
 	static FName GetTabName();
 
 	static void RegisterTabSpawner(FTabManager& TabManager);
-
 };
 
 class FAttachInputProcessor : public IInputProcessor
@@ -55,10 +53,12 @@ public:
 	~FAttachInputProcessor() { GASAttachEditorWidgetPtr = nullptr; };
 
 private:
-
 	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	virtual const TCHAR* GetDebugName() const override { return TEXT("AttachInputProcessor"); }
-	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override {}
+
+	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override
+	{
+	}
 
 private:
 	SGASAttachEditor* GASAttachEditorWidgetPtr;
