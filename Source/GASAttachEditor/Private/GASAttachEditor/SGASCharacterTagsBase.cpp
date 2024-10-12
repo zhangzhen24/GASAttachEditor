@@ -22,34 +22,35 @@ void SCharacterTagsViewItem::Construct(const FArguments& InArgs)
 {
 	TagsItem = InArgs._TagsItem;
 
-	FTextBlockStyle InTextStyle = FCoreStyle::Get().GetWidgetStyle< FTextBlockStyle >("NormalText");
+	FTextBlockStyle InTextStyle = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("NormalText");
 	InTextStyle.ColorAndOpacity = FSlateColor(FLinearColor::White);
-
+	InTextStyle.Font.Size = 10;
+	
 	ChildSlot
-		[
-			SNew(SButton)
+	[
+		SNew(SButton)
+		.ContentPadding(2.5)
 #if WITH_EDITOR
-			.ButtonStyle(FAppStyle::Get(), "NoBorder")
+		.ButtonStyle(FAppStyle::Get(), "NoBorder")
 #endif
-			.ToolTipText(TagsItem.IsValid() ? TagsItem->GetTagTipName() : FText())
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Center)
-			.OnClicked(this, &SCharacterTagsViewItem::HandleOnClicked)
-			[
-				SAssignNew(ShowTextTag,STextBlock)
-				.Text(TagsItem.IsValid() ? TagsItem->GetTagName() : FText())
-				.TextStyle(&InTextStyle)
-				
-			]
+		.ToolTipText(TagsItem.IsValid() ? TagsItem->GetTagTipName() : FText())
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Center)
+		.OnClicked(this, &SCharacterTagsViewItem::HandleOnClicked)
+		[
+			SAssignNew(ShowTextTag, STextBlock)
+			.Text(TagsItem.IsValid() ? TagsItem->GetTagName() : FText())
+			.TextStyle(&InTextStyle)
+
 		]
-	;
+	];
 }
 
 FReply SCharacterTagsViewItem::HandleOnClicked()
 {
 	FString Str = ShowTextTag->GetText().ToString();
 	int32 StrIndex = ShowTextTag->GetText().ToString().Find(TEXT("["));
-	FPlatformApplicationMisc::ClipboardCopy(*(Str.Left(StrIndex -1)));
+	FPlatformApplicationMisc::ClipboardCopy(*(Str.Left(StrIndex - 1)));
 	return FReply::Handled();
 }
 
@@ -63,8 +64,10 @@ FText FGASCharacterTags::GetTagTipName() const
 	FString Str = FString::Printf(TEXT("%s [%d]"), *GameplayTag.ToString(), ASComponent->GetTagCount(GameplayTag));
 
 #if WITH_EDITOR
-	FString OutComment; FName OutTagSource; bool bOutIsTagExplicit, bOutIsRestrictedTag, bOutAllowNonRestrictedChildren;
-	if (UGameplayTagsManager::Get().GetTagEditorData(*GameplayTag.ToString(),OutComment,OutTagSource,bOutIsTagExplicit,bOutIsRestrictedTag,bOutAllowNonRestrictedChildren))
+	FString OutComment;
+	FName OutTagSource;
+	bool bOutIsTagExplicit, bOutIsRestrictedTag, bOutAllowNonRestrictedChildren;
+	if (UGameplayTagsManager::Get().GetTagEditorData(*GameplayTag.ToString(), OutComment, OutTagSource, bOutIsTagExplicit, bOutIsRestrictedTag, bOutAllowNonRestrictedChildren))
 	{
 		// <Tag命名为止
 		// Tag name
@@ -80,7 +83,7 @@ FText FGASCharacterTags::GetTagTipName() const
 		// Are there any comments
 		if (!OutComment.IsEmpty())
 		{
-			Str += FString::Printf(TEXT("\n\n%s"),*OutComment);
+			Str += FString::Printf(TEXT("\n\n%s"), *OutComment);
 		}
 	}
 #endif
@@ -95,7 +98,7 @@ FText FGASCharacterTags::GetTagTipName() const
 
 		if (ActivationTags->HasTag(GameplayTag))
 		{
-			Str += FString::Printf(TEXT("\n\n  %s"),*ASComponent->CleanupName(GetNameSafe(AbilitySpec.Ability)));
+			Str += FString::Printf(TEXT("\n\n  %s"), *ASComponent->CleanupName(GetNameSafe(AbilitySpec.Ability)));
 		}
 
 		//AbilitySpec.DynamicAbilityTags.
@@ -119,7 +122,7 @@ TSharedRef<FGASCharacterTags> FGASCharacterTags::Create(TWeakObjectPtr<UAbilityS
 }
 
 FGASCharacterTags::FGASCharacterTags(TWeakObjectPtr<UAbilitySystemComponent> InASComponent, FGameplayTag InGameplayTag, FName InWidegtName)
-	:FGASCharacterTagsBase()
+	: FGASCharacterTagsBase()
 {
 	ASComponent = InASComponent;
 	GameplayTag = InGameplayTag;

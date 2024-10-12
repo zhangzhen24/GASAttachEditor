@@ -1336,7 +1336,7 @@ TSharedPtr<SWidget> SGASAttachEditorImpl::CreateAbilityTagWidget()
 #endif
 				[
 					SAssignNew(FilteredOwnedTagsView, SWrapBox)
-					.Orientation(EOrientation::Orient_Horizontal)
+					.Orientation(EOrientation::Orient_Vertical)//todo:zhangzhen
 					.UseAllottedSize(true)
 					.InnerSlotPadding(FVector2D(5.f))
 				]
@@ -1368,7 +1368,7 @@ TSharedPtr<SWidget> SGASAttachEditorImpl::CreateAbilityTagWidget()
 				.Padding(2.f)
 				[
 					SAssignNew(FilteredBlockedTagsView, SWrapBox)
-					.Orientation(EOrientation::Orient_Horizontal)
+					.Orientation(EOrientation::Orient_Vertical)
 					.UseAllottedSize(true)
 					.InnerSlotPadding(FVector2D(5.f))
 				]
